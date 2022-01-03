@@ -1,36 +1,50 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
-  const [toDo, setToDo] = useState("");
-  const [toDos, setToDos] = useState([]);
-  const onChange = (event) => setToDo(event.target.value);
-  const onSubmit = (event) => {
-    event.preventDefault();
-    if (toDo === "") {
-      return;
-    }
-    setToDo("");
-    setToDos((currentArray) => [toDo, ...currentArray]);
+  const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState([]);
+  const [targetCoin, setTargetCoin] = useState("");
+  const [balance, setBalance] = useState("");
+  const onDecide = (e) => setTargetCoin(e.target.value);
+  const handleInput = (e) => {
+    setBalance(e.target.value);
   };
-  console.log(toDos);
+  useEffect(() => {
+    fetch("https://api.coinpaprika.com/v1/tickers")
+      .then((response) => response.json())
+      .then((json) => {
+        setCoins(json);
+        setLoading(false);
+      });
+  }, []);
+  console.log(targetCoin);
+  console.log(balance);
   return (
     <div>
-      <h1>My To Dos ({toDos.length})</h1>
-      <form onSubmit={onSubmit}>
-        <input
-          onChange={onChange}
-          value={toDo}
-          type="text"
-          placeholder="Write your to do..."
-        />
-        <button>Add To Do</button>
-      </form>
+      <h1>The Coins! {loading ? "" : `(${coins.length})`}</h1>
       <hr />
-      <ul>
-        {toDos.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
+      <hr />
+      {loading ? (
+        <strong>Loading...</strong>
+      ) : (
+        <select onChange={onDecide} value={targetCoin}>
+          {coins.map((coin, index) => (
+            <option key={index} value={coin.quotes.USD.price}>
+              {coin.name} ({coin.symbol}): $
+              {Math.round((coin.quotes.USD.price * 100) / 100)} USD
+            </option>
+          ))}
+        </select>
+      )}
+      <div style={{ marginTop: "10px", marginRight: "10px" }}>
+        <input
+          onChange={handleInput}
+          value={balance}
+          placeholder="Write your Balance"
+        />
+        <strong>You can buy </strong>
+        <h2>You can convert TO {balance / targetCoin}</h2>
+      </div>
     </div>
   );
 }
