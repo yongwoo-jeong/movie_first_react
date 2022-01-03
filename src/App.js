@@ -17,8 +17,6 @@ function App() {
         setLoading(false);
       });
   }, []);
-  console.log(targetCoin);
-  console.log(balance);
   return (
     <div>
       <h1>The Coins! {loading ? "" : `(${coins.length})`}</h1>
@@ -28,6 +26,7 @@ function App() {
         <strong>Loading...</strong>
       ) : (
         <select onChange={onDecide} value={targetCoin}>
+          <option>Select Coin First</option>
           {coins.map((coin, index) => (
             <option key={index} value={coin.quotes.USD.price}>
               {coin.name} ({coin.symbol}): $
@@ -43,7 +42,13 @@ function App() {
           placeholder="Write your Balance"
         />
         <strong>You can buy </strong>
-        <h2>You can convert TO {balance / targetCoin}</h2>
+        {balance ? (
+          <h2>
+            You can convert TO {Math.round((balance / targetCoin) * 100) / 100}
+          </h2>
+        ) : (
+          <h3>Input your balance Please</h3>
+        )}
       </div>
     </div>
   );
